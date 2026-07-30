@@ -1,0 +1,3 @@
+NAME               DESIRED   CURRENT   READY   AGE
+nginx-67c47577c    0         0         0       92s
+nginx-69c95cff8b   1         1         1       2m50s

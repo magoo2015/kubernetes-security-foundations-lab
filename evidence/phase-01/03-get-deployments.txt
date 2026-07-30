@@ -1,0 +1,2 @@
+NAME    READY   UP-TO-DATE   AVAILABLE   AGE     CONTAINERS   IMAGES         SELECTOR
+nginx   1/1     1            1           2m49s   nginx        nginx:1.27.4   app=nginx

@@ -1,0 +1,81 @@
+### kubectl get
+NAME                    READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/nginx   1/1     1            1           2m52s
+
+NAME                               DESIRED   CURRENT   READY   AGE
+replicaset.apps/nginx-67c47577c    0         0         0       94s
+replicaset.apps/nginx-69c95cff8b   1         1         1       2m52s
+
+NAME                         READY   STATUS    RESTARTS   AGE
+pod/nginx-69c95cff8b-z585x   1/1     Running   0          78s
+
+NAME            TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)   AGE
+service/nginx   ClusterIP   <IP_REDACTED>   <none>        80/TCP    3m27s
+
+### kubectl describe deployment (excerpt)
+Name:                   nginx
+Namespace:              lab-app
+CreationTimestamp:      Thu, 30 Jul 2026 15:06:29 +0000
+Labels:                 app=nginx
+                        app.kubernetes.io/name=nginx
+                        app.kubernetes.io/part-of=kubernetes-security-foundations-lab
+Annotations:            deployment.kubernetes.io/revision: 3
+Selector:               app=nginx
+Replicas:               1 desired | 1 updated | 1 total | 1 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  0 max unavailable, 1 max surge
+Pod Template:
+  Labels:  app=nginx
+           app.kubernetes.io/name=nginx
+  Containers:
+   nginx:
+    Image:      nginx:1.27.4
+    Port:       80/TCP (http)
+    Host Port:  0/TCP (http)
+    Limits:
+      cpu:     250m
+      memory:  128Mi
+    Requests:
+      cpu:         50m
+      memory:      64Mi
+    Liveness:      http-get http://:http/ delay=5s timeout=1s period=10s #success=1 #failure=3
+    Readiness:     http-get http://:http/ delay=2s timeout=1s period=5s #success=1 #failure=3
+    Environment:   <none>
+    Mounts:        <none>
+  Volumes:         <none>
+  Node-Selectors:  <none>
+  Tolerations:     <none>
+Conditions:
+  Type           Status  Reason
+
+### kubectl logs (tail)
+<IP_REDACTED> - - [30/Jul/2026:15:09:05 +0000] "GET / HTTP/1.1" 200 615 "-" "kube-probe/1.36" "-"
+<IP_REDACTED> - - [30/Jul/2026:15:09:10 +0000] "GET / HTTP/1.1" 200 615 "-" "kube-probe/1.36" "-"
+<IP_REDACTED> - - [30/Jul/2026:15:09:14 +0000] "GET / HTTP/1.1" 200 615 "-" "kube-probe/1.36" "-"
+<IP_REDACTED> - - [30/Jul/2026:15:09:15 +0000] "GET / HTTP/1.1" 200 615 "-" "kube-probe/1.36" "-"
+<IP_REDACTED> - - [30/Jul/2026:15:09:20 +0000] "GET / HTTP/1.1" 200 615 "-" "kube-probe/1.36" "-"
+
+### kubectl explain deployment.spec.replicas
+GROUP:      apps
+KIND:       Deployment
+VERSION:    v1
+
+FIELD: replicas <integer>
+
+
+DESCRIPTION:
+    Number of desired pods. This is a pointer to distinguish between explicit
+    zero and not specified. Defaults to 1.
+    
+
+
+### kubectl rollout status
+deployment "nginx" successfully rolled out
+
+### kubectl rollout history
+deployment.apps/nginx 
+REVISION  CHANGE-CAUSE
+2         <none>
+3         <none>
+

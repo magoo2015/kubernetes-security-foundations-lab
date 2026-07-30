@@ -1,0 +1,6 @@
+Deleting pod: nginx-69c95cff8b-fxlbw
+NAME                     READY   STATUS    RESTARTS   AGE   IP           NODE               NOMINATED NODE   READINESS GATES
+nginx-69c95cff8b-mj5qq   0/1     Running   0          3s    <IP_REDACTED>   k8s-security-lab   <none>           <none>
+NAME               DESIRED   CURRENT   READY   AGE
+nginx-69c95cff8b   1         1         1       77s
+--- explain: ReplicaSet controller recreates pods to match desired replicas ---

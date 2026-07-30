@@ -1,0 +1,4 @@
+NAME                     READY   STATUS      RESTARTS   AGE   IP           NODE               NOMINATED NODE   READINESS GATES
+nginx-69c95cff8b-fxlbw   1/1     Running     0          69s   <IP_REDACTED>    k8s-security-lab   <none>           <none>
+nginx-69c95cff8b-n4wjf   0/1     Completed   0          11s   <IP_REDACTED>   k8s-security-lab   <none>           <none>
+nginx-69c95cff8b-vbnsj   0/1     Completed   0          11s   <IP_REDACTED>   k8s-security-lab   <none>           <none>

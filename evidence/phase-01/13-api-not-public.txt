@@ -1,0 +1,24 @@
+UFW status:
+Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), deny (routed)
+New profiles: skip
+
+To                         Action      From
+--                         ------      ----
+22/tcp (OpenSSH)           ALLOW IN    Anywhere                  
+22/tcp (OpenSSH (v6))      ALLOW IN    Anywhere (v6)             
+
+
+Listeners on 6443:
+LISTEN 0      4096               *:6443             *:*    users:(("k3s-server",pid=21249,fd=12))                 
+
+UFW rules mentioning 6443:
+none (API not allowed through host firewall)
+
+kubectl cluster-info (control plane URL):
+Kubernetes control plane is running at https://<IP_REDACTED>:6443
+CoreDNS is running at https://<IP_REDACTED>:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+Metrics-server is running at https://<IP_REDACTED>:6443/api/v1/namespaces/kube-system/services/https:metrics-server:https/proxy
+
+Note: kubeconfig not included in evidence. Cluster access is local via K3s kubeconfig.

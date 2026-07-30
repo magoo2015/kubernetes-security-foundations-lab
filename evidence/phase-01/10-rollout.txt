@@ -1,0 +1,23 @@
+deployment.apps/nginx 
+REVISION  CHANGE-CAUSE
+1         <none>
+
+Waiting for deployment "nginx" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "nginx" rollout to finish: 1 old replicas are pending termination...
+deployment "nginx" successfully rolled out
+NAME                     READY   STATUS        RESTARTS   AGE   IP           NODE               NOMINATED NODE   READINESS GATES
+nginx-67c47577c-mbv4f    1/1     Running       0          13s   <IP_REDACTED>   k8s-security-lab   <none>           <none>
+nginx-69c95cff8b-mj5qq   1/1     Terminating   0          21s   <IP_REDACTED>   k8s-security-lab   <none>           <none>
+NAME               DESIRED   CURRENT   READY   AGE
+nginx-67c47577c    1         1         1       14s
+nginx-69c95cff8b   0         0         0       92s
+Annotations:            deployment.kubernetes.io/revision: 2
+Replicas:               1 desired | 1 updated | 1 total | 1 available | 0 unavailable
+    Image:      nginx:1.28.0
+OldReplicaSets:  nginx-69c95cff8b (0/0 replicas created)
+NewReplicaSet:   nginx-67c47577c (1/1 replicas created)
+deployment.apps/nginx 
+REVISION  CHANGE-CAUSE
+1         <none>
+2         <none>
+
