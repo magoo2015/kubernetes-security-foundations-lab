@@ -1,0 +1,38 @@
+# Environment and secrets
+.env
+.env.*
+
+# Certificates and key material
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Common private/public key filenames (never commit)
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+authorized_keys
+known_hosts
+known_hosts.old
+
+# SSH client directories (path-specific; avoid bare "config" which can hide project files)
+.ssh/
+**/.ssh/
+
+# Kubernetes credentials
+.kube/
+kubeconfig
+*.kubeconfig
+
+# Local noise
+*.log
+*.tmp
+*.swp
+.DS_Store
+
+# Local system backups (kept outside the repo by design; ignore if copied here)
+backups/
+**/backups/
