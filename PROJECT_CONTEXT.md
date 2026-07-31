@@ -7,6 +7,7 @@
 - Document decisions, evidence, and limitations so later phases can revisit controls safely.
 - Build intuition for desired state, reconciliation, and core workload objects before adding RBAC, PSA, and NetworkPolicies.
 - Practice least-privilege RBAC with validation, threat modeling, and detection-oriented notes.
+- Harden workloads with Pod Security Admission (Restricted), SecurityContext, and resource limits.
 
 ## Scope constraints
 
@@ -16,7 +17,9 @@
 
 **Completed — Phase 2:** authorization overview docs; ServiceAccount `security-reader`; Role/RoleBinding (get/list/watch pods, services, deployments in `lab-app`); `kubectl auth can-i` validation; temporary unsafe `cluster-admin` binding demo then removal; common mistakes, threat model, detection notes; interview notes; portfolio / chat context / changelog; sanitized evidence.
 
-**Out of scope until later phases:** NetworkPolicies, Pod Security Admission, Falco, Helm, Terraform, Prometheus, Grafana, GitOps, ArgoCD, Ingress, Load Balancers, multi-node clusters, advanced Secrets management, Kubernetes audit logging configuration.
+**Completed — Phase 3:** Pod Security Admission overview (PSP history → PSA); namespace labels enforce/warn/audit = **restricted**; hardened nginx (`nginxinc/nginx-unprivileged:1.27.4`) with SecurityContext (non-root, drop ALL, RO rootfs, RuntimeDefault seccomp, runAsUser/Group/fsGroup); CPU/memory requests+limits; `automountServiceAccountToken: false` (workload-identity control, not PSA); temporary privileged+hostPID+hostNetwork demo then delete; threat model; detection docs; production considerations (Kyverno/Gatekeeper/signing); interview notes; evidence.
+
+**Out of scope until later phases:** NetworkPolicies, Secrets hardening, Falco, Helm, Terraform, Prometheus, Grafana, GitOps, ArgoCD, Ingress, Load Balancers, multi-node clusters, Kubernetes audit logging configuration.
 
 ## Current VPS architecture
 
@@ -26,17 +29,18 @@
 - Administrative user: `sysadmin` (member of `sudo`)
 - Access: SSH key authentication to `sysadmin` on port 22
 - Cluster: K3s **v1.36.2+k3s1**, containerd runtime
-- Workload: `lab-app` / Deployment `nginx` / Service `nginx` (ClusterIP)
+- Workload: `lab-app` / Deployment `nginx` (`nginxinc/nginx-unprivileged:1.27.4`) / Service `nginx` (ClusterIP :80 → targetPort 8080)
+- PSA: `lab-app` enforce/warn/audit **restricted**
 - RBAC: `security-reader` SA + Role + RoleBinding (namespace read-only on pods/services/deployments)
 - Hostname (lab): see evidence placeholders (`<HOSTNAME>`)
 
 ## Current phase
 
-**Phase 2 — RBAC & least privilege: complete**
+**Phase 3 — Pod Security Admission & workload hardening: complete**
 
-Next: Phase 3 (NetworkPolicies / workload isolation) when scheduled.
+Next: Phase 4 (NetworkPolicies / workload isolation) when scheduled.
 
-## Installed components (Phase 1 + 2)
+## Installed components (Phase 1–3)
 
 | Component | Detail |
 |-----------|--------|
@@ -45,7 +49,7 @@ Next: Phase 3 (NetworkPolicies / workload isolation) when scheduled.
 | containerd | Bundled with K3s (`containerd://2.3.2-k3s2`) |
 | CoreDNS / metrics-server | K3s defaults (observed via `kubectl cluster-info`) |
 | kubeconfig | Host path `/etc/rancher/k3s/k3s.yaml`; user copy `~/.kube/config` (**not in Git**) |
-| Workload manifests | `manifests/lab-app/` (Namespace, Deployment, Service) |
+| Workload manifests | `manifests/lab-app/` (Namespace + PSA labels, hardened Deployment, Service) |
 | RBAC manifests | `manifests/rbac/` (ServiceAccount, Role, RoleBinding) |
 
 ## SSH access model
@@ -90,11 +94,11 @@ Next: Phase 3 (NetworkPolicies / workload isolation) when scheduled.
 - `unattended-upgrades` installed, enabled, and active
 - Automatic reboot: **not enabled**
 
-## Key decisions (Phase 0 + 1 + 2)
+## Key decisions (Phase 0–3)
 
 1. Harden SSH via a named drop-in rather than rewriting the full `sshd_config`.
 2. Keep SSH on port 22; rely on keys + Fail2ban + dual firewalls.
-3. Enable UFW with SSH allow first; **do not open 6443** for Phase 1–2.
+3. Enable UFW with SSH allow first; **do not open 6443** for Phase 1–3.
 4. Use official K3s install; accept single-node SQLite datastore for lab simplicity.
 5. Prefer ClusterIP Services (no public app exposure) for foundations demos.
 6. Keep declarative manifests in Git; use imperative kubectl only for teaching exercises.
@@ -102,6 +106,12 @@ Next: Phase 3 (NetworkPolicies / workload isolation) when scheduled.
 8. Use a dedicated `security-reader` ServiceAccount—do not grant powers to `default`.
 9. Enumerate verbs/resources (no wildcards) in the Role; bind only via RoleBinding.
 10. Unsafe `cluster-admin` demo must be deleted and revalidated; never leave it standing or committed as desired state.
+11. Enforce **Restricted** PSA on `lab-app`; stock `nginx:1.27.4` cannot satisfy it—use unprivileged image + SecurityContext + emptyDir mounts.
+12. Privileged / hostPID / hostNetwork demos are temporary only; restore Restricted and prove rejection afterward.
+
+## Final layered security posture (Phase 3)
+
+The NGINX workload in `lab-app` now has Restricted PSA; non-root UID/GID 101; `allowPrivilegeEscalation: false`; all capabilities dropped; `RuntimeDefault` seccomp; read-only root filesystem; CPU/memory requests and limits; `automountServiceAccountToken: false` (no auto-mounted API token); and no privileged / `hostPID` / `hostNetwork` workloads remaining. SA token disablement is a separate workload-identity control—not enforced by PSA.
 
 ## Known limitations
 
@@ -109,25 +119,25 @@ Next: Phase 3 (NetworkPolicies / workload isolation) when scheduled.
 - UFW allows SSH from Anywhere at the host layer (source IP may not be stable).
 - Default K3s **human** kubeconfig is still cluster-admin; Phase 2 hardened a *workload* identity, not operator SSO.
 - Default allow-all Pod networking; no NetworkPolicies yet.
-- No Pod Security Admission hardening yet.
 - No audit logging / runtime detection (Falco) yet.
-- Passwordless sudo may be temporarily enabled for agent automation; must be removed after lab work.
+- PSA does not gate SA automount; other Pods may still mount tokens unless set explicitly (nginx is disabled).
+- Temporary passwordless sudo was removed after Phase 3 validation.
 - Not production hardened.
 
 ## Remaining roadmap
 
 | Phase | Intent |
 |-------|--------|
-| **3** | NetworkPolicies / workload isolation |
-| **4** | Audit logging, metrics/detection orientation |
-| **5** | Threat scenarios and remediation practice |
+| **4** | NetworkPolicies / workload isolation |
+| **5** | Audit logging, metrics/detection orientation |
+| **6** | Threat scenarios and remediation practice |
 
-Related deeper topics (PSA, Secrets patterns, Falco, GitOps, human break-glass RBAC) land in later phases as scoped.
+Related deeper topics (Secrets patterns, Falco, GitOps, human break-glass RBAC, custom seccomp) land in later phases as scoped.
 
 ## Reboot requirement
 
-- Phase 0/1/2: **no reboot required** for documented work.
+- Phase 0–3: **no reboot required** for documented work.
 
 ## Next phase
 
-**Phase 3 — not started.** Explicit non-goals remain deferred: NetworkPolicies, Pod Security Admission, Falco, Helm, Ingress, multi-node, audit log configuration.
+**Phase 4 — not started.** NetworkPolicies / east-west isolation. Explicit non-goals remain deferred: Falco, Helm, Ingress, multi-node, audit log configuration (Phase 5+).

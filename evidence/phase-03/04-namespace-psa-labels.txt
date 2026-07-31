@@ -1,0 +1,2 @@
+NAME      STATUS   AGE   LABELS
+lab-app   Active   15h   app.kubernetes.io/part-of=kubernetes-security-foundations-lab,kubernetes.io/metadata.name=lab-app,phase=03,pod-security.kubernetes.io/audit-version=latest,pod-security.kubernetes.io/audit=restricted,pod-security.kubernetes.io/enforce-version=latest,pod-security.kubernetes.io/enforce=restricted,pod-security.kubernetes.io/warn-version=latest,pod-security.kubernetes.io/warn=restricted

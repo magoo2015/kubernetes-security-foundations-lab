@@ -9,9 +9,10 @@ Hands-on lab that teaches **Kubernetes through security engineering**: harden th
 | **Phase 0** — Host hardening | **Complete** |
 | **Phase 1** — K3s + Kubernetes foundations | **Complete** |
 | **Phase 2** — RBAC & least privilege | **Complete** |
-| Phase 3+ — NetworkPolicy, audit, detection, threat scenarios | Not started |
+| **Phase 3** — Pod Security Admission & workload hardening | **Complete** |
+| Phase 4+ — NetworkPolicy, audit, detection, threat scenarios | Not started |
 
-Phase 2 added a dedicated `security-reader` ServiceAccount, namespace Role/RoleBinding (read-only pods/services/deployments in `lab-app`), `kubectl auth can-i` validation, and a temporary unsafe `cluster-admin` demo that was removed so the lab ends secure. The Kubernetes API remains **not** allowed through UFW (SSH only).
+Phase 3 labeled `lab-app` for **Restricted** PSA, switched nginx to an unprivileged image with full SecurityContext (non-root, drop ALL capabilities, read-only rootfs, RuntimeDefault seccomp), retained CPU/memory requests and limits, and demonstrated a temporary privileged Pod that was deleted so the lab ends secure.
 
 ## Planned phases
 
@@ -20,9 +21,10 @@ Phase 2 added a dedicated `security-reader` ServiceAccount, namespace Role/RoleB
 | **0** | Host preparation and hardening |
 | **1** | Single-node K3s install and core workload fundamentals |
 | **2** | Cluster hardening and least-privilege access (RBAC) |
-| **3** | Network policy and workload isolation |
-| **4** | Observability, detection, and audit |
-| **5** | Threat scenarios and remediation practice |
+| **3** | Pod Security Admission and workload hardening |
+| **4** | Network policy and workload isolation |
+| **5** | Observability, detection, and audit |
+| **6** | Threat scenarios and remediation practice |
 
 Exact later-phase names may evolve.
 
@@ -41,6 +43,7 @@ kubernetes-security-foundations-lab/
 │   ├── phase-00-host-hardening.md
 │   ├── phase-01-kubernetes-foundations.md
 │   ├── phase-02-rbac-least-privilege.md
+│   ├── phase-03-pod-security-admission.md
 │   ├── interview-notes.md
 │   └── lab-notes.md
 ├── manifests/
@@ -55,14 +58,16 @@ kubernetes-security-foundations-lab/
 └── evidence/
     ├── phase-00/
     ├── phase-01/
-    └── phase-02/
+    ├── phase-02/
+    └── phase-03/
 ```
 
-## Quick start (RBAC)
+## Quick start (workload + RBAC)
 
 ```bash
 kubectl apply -f manifests/lab-app/
 kubectl apply -f manifests/rbac/
+kubectl get ns lab-app --show-labels
 kubectl auth can-i get pods -n lab-app \
   --as=system:serviceaccount:lab-app:security-reader
 ```
@@ -77,6 +82,7 @@ This environment is a **temporary DigitalOcean VPS**. Changes to SSH and the hos
 - Do not open Kubernetes API (6443) or application NodePorts/Ingress unless a later phase explicitly requires it and documents the risk.
 - Never commit secrets, keys, tokens, kubeconfig, or raw public IPs into this repository.
 - Never leave standing `cluster-admin` bindings on workload ServiceAccounts.
+- Never leave privileged / hostNetwork / hostPID demo Pods deployed.
 
 ## Disclaimer
 

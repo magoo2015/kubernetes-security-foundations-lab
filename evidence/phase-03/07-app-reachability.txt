@@ -1,0 +1,10 @@
+# HTTP via Restricted-compliant curl Pod (expect 200)
+pod/curl-phase03 created
+pod/curl-phase03 condition met
+http_code=200
+
+# Probe from nginx Pod to Service ClusterIP
+error: Internal error occurred: Internal error occurred: error executing command in container: failed to exec in container: failed to start exec "8c2511916aaa0dfc1321966fdd60e66fb455de07b6e7db10d7b6723d73b6107e": OCI runtime exec failed: exec failed: unable to start container process: exec: "wget": executable file not found in $PATH
+
+Service ClusterIP probe skipped if no client in image; in-cluster curl above is primary
+pod "curl-phase03" deleted from lab-app namespace

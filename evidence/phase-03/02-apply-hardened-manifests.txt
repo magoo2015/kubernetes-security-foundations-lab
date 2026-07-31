@@ -1,0 +1,6 @@
+# kubectl apply -f manifests/lab-app/
+Warning: existing pods in namespace "lab-app" violate the new PodSecurity enforce level "restricted:latest"
+Warning: nginx-69c95cff8b-z585x: allowPrivilegeEscalation != false, unrestricted capabilities, runAsNonRoot != true, seccompProfile
+namespace/lab-app configured
+deployment.apps/nginx configured
+service/nginx unchanged

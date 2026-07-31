@@ -1,0 +1,33 @@
+# Final pods / deploy / svc
+NAME                         READY   STATUS    RESTARTS   AGE   IP           NODE               NOMINATED NODE   READINESS GATES
+pod/nginx-6cf78d8c7c-hb97p   1/1     Running   0          48s   <IP_REDACTED>   k8s-security-lab   <none>           <none>
+
+NAME            TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)   AGE   SELECTOR
+service/nginx   ClusterIP   <IP_REDACTED>   <none>        80/TCP    15h   app=nginx
+
+NAME                    READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                               SELECTOR
+deployment.apps/nginx   1/1     1            1           15h   nginx        nginxinc/nginx-unprivileged:1.27.4   app=nginx
+
+NAME                               DESIRED   CURRENT   READY   AGE   CONTAINERS   IMAGES                               SELECTOR
+replicaset.apps/nginx-67c47577c    0         0         0       15h   nginx        nginx:1.28.0                         app=nginx,pod-template-hash=67c47577c
+replicaset.apps/nginx-69c95cff8b   0         0         0       15h   nginx        nginx:1.27.4                         app=nginx,pod-template-hash=69c95cff8b
+replicaset.apps/nginx-6cf78d8c7c   1         1         1       48s   nginx        nginxinc/nginx-unprivileged:1.27.4   app=nginx,pod-template-hash=6cf78d8c7c
+replicaset.apps/nginx-7d6d6f4585   0         0         0       13m   nginx        nginxinc/nginx-unprivileged:1.27.4   app=nginx,pod-template-hash=7d6d6f4585
+
+# Pod security fields
+nginx-6cf78d8c7c-hb97p privileged= hostNetwork= hostPID= runAsNonRoot=true runAsUser=101 automountServiceAccountToken=false
+
+# PSA labels
+NAME      STATUS   AGE   LABELS
+lab-app   Active   15h   app.kubernetes.io/part-of=kubernetes-security-foundations-lab,kubernetes.io/metadata.name=lab-app,phase=03,pod-security.kubernetes.io/audit-version=latest,pod-security.kubernetes.io/audit=restricted,pod-security.kubernetes.io/enforce-version=latest,pod-security.kubernetes.io/enforce=restricted,pod-security.kubernetes.io/warn-version=latest,pod-security.kubernetes.io/warn=restricted
+
+# Process identity
+uid=101(nginx) gid=101(nginx) groups=101(nginx)
+
+# SA token path
+ls: cannot access '/var/run/secrets/kubernetes.io/serviceaccount': No such file or directory
+PATH_ABSENT
+
+# Deployment Available
+NAME    READY   UP-TO-DATE   AVAILABLE   AGE
+nginx   1/1     1            1           15h

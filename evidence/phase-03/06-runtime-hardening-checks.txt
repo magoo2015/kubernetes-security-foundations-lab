@@ -1,0 +1,20 @@
+# id (expect non-root)
+uid=101(nginx) gid=101(nginx) groups=101(nginx)
+
+# CapEff (expect zeros / empty effective caps)
+Uid:	101	101	101	101
+Gid:	101	101	101	101
+CapInh:	0000000000000000
+CapPrm:	0000000000000000
+CapEff:	0000000000000000
+CapBnd:	0000000000000000
+CapAmb:	0000000000000000
+
+# read-only root filesystem check
+touch: cannot touch '/ro-test': Read-only file system
+exit:1
+
+# writable emptyDir mounts
+-rw-r--r-- 1 nginx nginx 0 Jul 31 06:06 /tmp/ok
+-rw-r--r-- 1 nginx nginx 0 Jul 31 06:06 /var/cache/nginx/ok
+-rw-r--r-- 1 nginx nginx 0 Jul 31 06:06 /var/run/ok

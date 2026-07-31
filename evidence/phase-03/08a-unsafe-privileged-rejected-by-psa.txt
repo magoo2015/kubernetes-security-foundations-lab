@@ -1,0 +1,5 @@
+# Attempt privileged+hostPID+hostNetwork Pod under enforce=restricted (expect Denied)
+Error from server (Forbidden): error when creating "STDIN": pods "unsafe-privileged-demo" is forbidden: violates PodSecurity "restricted:latest": host namespaces (hostNetwork=true, hostPID=true), privileged (container "pause" must not set securityContext.privileged=true), allowPrivilegeEscalation != false (container "pause" must set securityContext.allowPrivilegeEscalation=false), unrestricted capabilities (container "pause" must set securityContext.capabilities.drop=["ALL"]), runAsNonRoot != true (pod or container "pause" must set securityContext.runAsNonRoot=true), seccompProfile (pod or container "pause" must set securityContext.seccompProfile.type to "RuntimeDefault" or "Localhost")
+
+# Confirm pod not present
+Error from server (NotFound): pods "unsafe-privileged-demo" not found

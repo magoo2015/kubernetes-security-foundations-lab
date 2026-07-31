@@ -1,0 +1,11 @@
+# Before Phase 3 harden — process identity
+uid=0(root) gid=0(root) groups=0(root)
+
+# Namespace labels before enforce apply
+NAME      STATUS   AGE   LABELS
+lab-app   Active   15h   app.kubernetes.io/part-of=kubernetes-security-foundations-lab,kubernetes.io/metadata.name=lab-app,phase=01,pod-security.kubernetes.io/warn=restricted
+
+# Dry-run enforce=restricted against existing pods (expected warnings)
+Warning: existing pods in namespace "lab-app" violate the new PodSecurity enforce level "restricted:latest"
+Warning: nginx-69c95cff8b-z585x: allowPrivilegeEscalation != false, unrestricted capabilities, runAsNonRoot != true, seccompProfile
+namespace/lab-app labeled (server dry run)

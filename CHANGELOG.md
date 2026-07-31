@@ -2,6 +2,39 @@
 
 All notable lab phases for this repository.
 
+## [Phase 3] — 2026-07-31
+
+### Features added
+
+- Pod Security Admission labels on `lab-app` (enforce/warn/audit = **restricted**)
+- Hardened nginx Deployment: `nginxinc/nginx-unprivileged:1.27.4`, non-root UID/GID 101, drop ALL capabilities, `allowPrivilegeEscalation: false`, `readOnlyRootFilesystem`, RuntimeDefault seccomp, emptyDir mounts
+- `automountServiceAccountToken: false` on nginx (workload does not call the API)
+- Documented CPU/memory requests and limits (resource exhaustion / noisy neighbor / DoS)
+- Temporary privileged + hostPID + hostNetwork Pod demo, then deletion and Restricted revalidation
+- Sanitized evidence under `evidence/phase-03/`
+
+### Security concepts
+
+- PSP removal → Pod Security Admission (Privileged / Baseline / Restricted)
+- SecurityContext fields as container blast-radius controls
+- Seccomp RuntimeDefault and capability dropping
+- PSA does not prevent SA token mounting — disable unused automount as a separate identity control
+- Production policy layers: Kyverno, Gatekeeper, image signing/provenance, GitOps/CI enforcement
+
+### Documentation added / updated
+
+- `docs/phase-03-pod-security-admission.md`
+- `docs/interview-notes.md`, `docs/lab-notes.md`
+- `PORTFOLIO.md`, `CHAT_CONTEXT.md`, `CHANGELOG.md`
+- Updates to `README.md`, `PROJECT_CONTEXT.md`
+
+### Lessons
+
+- Stock `nginx:1.27.4` fails Restricted (root, caps, no seccomp, privilege escalation defaults).
+- Unprivileged image + writable emptyDirs make RO rootfs practical.
+- Once enforce=restricted, even debug/curl Pods need compliant SecurityContext.
+- Disabling SA automount is orthogonal to PSA; nginx keeps serving HTTP without a mounted token.
+
 ## [Phase 2] — 2026-07-31
 
 ### Features added

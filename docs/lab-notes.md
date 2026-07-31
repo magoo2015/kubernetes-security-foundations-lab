@@ -1,5 +1,94 @@
 # Lab notes
 
+## Phase 3 — important commands
+
+```bash
+# Apply PSA labels + hardened workload
+kubectl apply -f manifests/lab-app/
+kubectl get ns lab-app --show-labels
+kubectl rollout status deployment/nginx -n lab-app
+
+# Validate hardening
+kubectl exec -n lab-app deploy/nginx -- id
+kubectl exec -n lab-app deploy/nginx -- cat /proc/1/status | grep -E '^(Uid|Cap)'
+kubectl exec -n lab-app deploy/nginx -- sh -c 'touch /ro-test 2>&1 || true'
+
+# App still reachable (probe Pod must also satisfy Restricted)
+# See evidence/phase-03/07-app-reachability.txt
+
+# Confirm no privileged leftover
+kubectl get pods -n lab-app -o jsonpath='{range .items[*]}{.metadata.name} privileged={.spec.containers[0].securityContext.privileged} hostNetwork={.spec.hostNetwork}{"\n"}{end}'
+
+# SA token not automounted (nginx never calls the API)
+kubectl get pods -n lab-app -l app=nginx -o jsonpath='{range .items[*]}{.metadata.name} automount={.spec.automountServiceAccountToken}{"\n"}{end}'
+kubectl exec -n lab-app deploy/nginx -- sh -c 'ls /var/run/secrets/kubernetes.io/serviceaccount 2>&1 || true'
+```
+
+## Phase 3 decisions
+
+- Enforce/warn/audit all set to **restricted** on `lab-app`.
+- Stock `nginx:1.27.4` could not satisfy Restricted (root, caps, no seccomp, privilege-escalation defaults, port 80 / writable rootfs assumptions).
+- Switched to `nginxinc/nginx-unprivileged:1.27.4` (UID 101, listen 8080) + emptyDir mounts for RO rootfs.
+- Resource requests/limits retained and documented (CPU 50m/250m, memory 64Mi/128Mi).
+- Set `automountServiceAccountToken: false` on the nginx Pod template — PSA does **not** prevent SA token mounting; this is a separate workload-identity control because nginx does not call the API.
+- Privileged+hostPID+hostNetwork Pod demo was temporary; deleted; Restricted restored and re-proven.
+- Detection / production policy (Kyverno, Gatekeeper, signing) documented only.
+
+## Phase 3 problems / notes
+
+- After Restricted enforce, ad-hoc `kubectl run` probe Pods are rejected unless SecurityContext is PSA-compliant.
+- Unprivileged nginx image has no `wget`; use a compliant curl Pod for Service HTTP checks.
+- Existing Pods are not mutated when enforce is enabled—only new creates/updates are gated (warnings noted on label apply).
+
+## Phase 3 — final layered security posture
+
+The NGINX workload in `lab-app` now has:
+
+- Restricted Pod Security Admission (enforce / warn / audit)
+- Non-root execution as UID/GID 101
+- `allowPrivilegeEscalation: false`
+- All Linux capabilities dropped
+- `RuntimeDefault` seccomp
+- Read-only root filesystem
+- CPU and memory requests and limits
+- `automountServiceAccountToken: false`
+- No automatically mounted Kubernetes API token
+- No privileged, `hostPID`, or `hostNetwork` workloads remaining
+
+Disabling the ServiceAccount token is a separate workload-identity hardening control and is **not** enforced by Pod Security Admission.
+
+## Troubleshooting — K3s kubeconfig permission denied
+
+Symptom:
+
+```text
+WARN Unable to read /etc/rancher/k3s/k3s.yaml
+error loading config file: permission denied
+```
+
+Cause: K3s may default `kubectl` to the root-owned kubeconfig at `/etc/rancher/k3s/k3s.yaml`. This repository’s normal `sysadmin` workflow uses the user-owned copy at `~/.kube/config`. The root-owned file should remain permission-restricted.
+
+Do **not**:
+
+- Loosen permissions on `/etc/rancher/k3s/k3s.yaml`
+- Routinely use `sudo kubectl`
+
+Session-level fix:
+
+```bash
+export KUBECONFIG="$HOME/.kube/config"
+kubectl get nodes
+```
+
+Optional persistent host-level fix: add the same `export` to `~/.bashrc`. `.bashrc` is host configuration and must **not** be added to or committed in this repository.
+
+Validated:
+
+```text
+/home/sysadmin/.kube/config
+Node k8s-security-lab returned Ready
+```
+
 ## Phase 2 — important commands
 
 ```bash
@@ -75,7 +164,7 @@ kubectl rollout history deployment/nginx -n lab-app
 
 - First `kubectl apply -f manifests/lab-app/` failed when files were named `deployment.yaml` / `namespace.yaml` / `service.yaml` because alphabetical order applied Deployment before Namespace existed. Fixed with numeric prefixes.
 - UFW `Default: routed` showed **deny** after K3s (was disabled/routed in Phase 0 capture). Inbound still deny-except-SSH; 6443 remains unallowed.
-- Temporary passwordless sudo used for agent automation; remove `/etc/sudoers.d/99-lab-agent-temp` after lab validation.
+- Temporary passwordless sudo was removed after Phase 3 validation.
 
 ## Phase 0 — important commands (unchanged)
 
