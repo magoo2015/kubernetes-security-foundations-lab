@@ -1,0 +1,17 @@
+# Namespace-scoped Role: read-only on Pods, Services, and Deployments in lab-app.
+# No create/update/patch/delete. No Secrets. No cluster-scoped resources.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: security-reader
+  namespace: lab-app
+  labels:
+    app.kubernetes.io/part-of: kubernetes-security-foundations-lab
+    app.kubernetes.io/component: rbac
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch"]

@@ -1,0 +1,37 @@
+=== ServiceAccounts ===
+NAME              AGE
+default           14h
+security-reader   0s
+
+=== Roles ===
+NAME              CREATED AT
+security-reader   2026-07-31T05:44:09Z
+
+=== RoleBindings ===
+NAME              ROLE                   AGE
+security-reader   Role/security-reader   1s
+
+=== Role YAML (describe) ===
+Name:         security-reader
+Labels:       app.kubernetes.io/component=rbac
+              app.kubernetes.io/part-of=kubernetes-security-foundations-lab
+Annotations:  <none>
+PolicyRule:
+  Resources         Non-Resource URLs  Resource Names  Verbs
+  ---------         -----------------  --------------  -----
+  pods              []                 []              [get list watch]
+  services          []                 []              [get list watch]
+  deployments.apps  []                 []              [get list watch]
+
+=== RoleBinding YAML (describe) ===
+Name:         security-reader
+Labels:       app.kubernetes.io/component=rbac
+              app.kubernetes.io/part-of=kubernetes-security-foundations-lab
+Annotations:  <none>
+Role:
+  Kind:  Role
+  Name:  security-reader
+Subjects:
+  Kind            Name             Namespace
+  ----            ----             ---------
+  ServiceAccount  security-reader  lab-app

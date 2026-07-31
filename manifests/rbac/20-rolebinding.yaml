@@ -1,0 +1,18 @@
+# Binds the security-reader Role to the security-reader ServiceAccount.
+# A Role without a RoleBinding grants nothing.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: security-reader
+  namespace: lab-app
+  labels:
+    app.kubernetes.io/part-of: kubernetes-security-foundations-lab
+    app.kubernetes.io/component: rbac
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: security-reader
+subjects:
+  - kind: ServiceAccount
+    name: security-reader
+    namespace: lab-app

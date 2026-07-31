@@ -1,0 +1,8 @@
+NAME                         READY   STATUS    RESTARTS   AGE
+pod/nginx-69c95cff8b-z585x   1/1     Running   0          14h
+
+NAME            TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)   AGE
+service/nginx   ClusterIP   <IP_REDACTED>   <none>        80/TCP    14h
+
+NAME                    READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/nginx   1/1     1            1           14h

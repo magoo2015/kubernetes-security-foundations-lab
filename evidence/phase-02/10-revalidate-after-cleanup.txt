@@ -1,0 +1,9 @@
+=== After removing unsafe binding ===
+no
+no
+no
+no
+yes
+
+=== Confirm ClusterRoleBinding gone ===
+Error from server (NotFound): clusterrolebindings.rbac.authorization.k8s.io "security-reader-unsafe-demo" not found

@@ -6,6 +6,7 @@
 - Establish a hardened Ubuntu baseline before introducing cluster software.
 - Document decisions, evidence, and limitations so later phases can revisit controls safely.
 - Build intuition for desired state, reconciliation, and core workload objects before adding RBAC, PSA, and NetworkPolicies.
+- Practice least-privilege RBAC with validation, threat modeling, and detection-oriented notes.
 
 ## Scope constraints
 
@@ -13,7 +14,9 @@
 
 **Completed — Phase 1:** official K3s install, cluster health checks, declarative nginx Deployment/Service in `lab-app`, scale / self-heal / rollout / rollback exercises, troubleshooting commands, sanitized evidence.
 
-**Out of scope until later phases:** RBAC hardening, NetworkPolicies, Pod Security Admission, Falco, Helm, Terraform, Prometheus, Grafana, GitOps, ArgoCD, Ingress, Load Balancers, multi-node clusters, advanced Secrets management, Kubernetes audit logging configuration.
+**Completed — Phase 2:** authorization overview docs; ServiceAccount `security-reader`; Role/RoleBinding (get/list/watch pods, services, deployments in `lab-app`); `kubectl auth can-i` validation; temporary unsafe `cluster-admin` binding demo then removal; common mistakes, threat model, detection notes; interview notes; portfolio / chat context / changelog; sanitized evidence.
+
+**Out of scope until later phases:** NetworkPolicies, Pod Security Admission, Falco, Helm, Terraform, Prometheus, Grafana, GitOps, ArgoCD, Ingress, Load Balancers, multi-node clusters, advanced Secrets management, Kubernetes audit logging configuration.
 
 ## Current VPS architecture
 
@@ -24,15 +27,16 @@
 - Access: SSH key authentication to `sysadmin` on port 22
 - Cluster: K3s **v1.36.2+k3s1**, containerd runtime
 - Workload: `lab-app` / Deployment `nginx` / Service `nginx` (ClusterIP)
+- RBAC: `security-reader` SA + Role + RoleBinding (namespace read-only on pods/services/deployments)
 - Hostname (lab): see evidence placeholders (`<HOSTNAME>`)
 
 ## Current phase
 
-**Phase 1 — Kubernetes foundations: complete**
+**Phase 2 — RBAC & least privilege: complete**
 
-Next: Phase 2 (RBAC / least-privilege) when scheduled.
+Next: Phase 3 (NetworkPolicies / workload isolation) when scheduled.
 
-## Installed components (Phase 1)
+## Installed components (Phase 1 + 2)
 
 | Component | Detail |
 |-----------|--------|
@@ -41,7 +45,8 @@ Next: Phase 2 (RBAC / least-privilege) when scheduled.
 | containerd | Bundled with K3s (`containerd://2.3.2-k3s2`) |
 | CoreDNS / metrics-server | K3s defaults (observed via `kubectl cluster-info`) |
 | kubeconfig | Host path `/etc/rancher/k3s/k3s.yaml`; user copy `~/.kube/config` (**not in Git**) |
-| Manifests | `manifests/lab-app/` (Namespace, Deployment, Service) |
+| Workload manifests | `manifests/lab-app/` (Namespace, Deployment, Service) |
+| RBAC manifests | `manifests/rbac/` (ServiceAccount, Role, RoleBinding) |
 
 ## SSH access model
 
@@ -85,42 +90,44 @@ Next: Phase 2 (RBAC / least-privilege) when scheduled.
 - `unattended-upgrades` installed, enabled, and active
 - Automatic reboot: **not enabled**
 
-## Key decisions (Phase 0 + 1)
+## Key decisions (Phase 0 + 1 + 2)
 
 1. Harden SSH via a named drop-in rather than rewriting the full `sshd_config`.
 2. Keep SSH on port 22; rely on keys + Fail2ban + dual firewalls.
-3. Enable UFW with SSH allow first; **do not open 6443** for Phase 1.
+3. Enable UFW with SSH allow first; **do not open 6443** for Phase 1–2.
 4. Use official K3s install; accept single-node SQLite datastore for lab simplicity.
 5. Prefer ClusterIP Services (no public app exposure) for foundations demos.
 6. Keep declarative manifests in Git; use imperative kubectl only for teaching exercises.
 7. Store system config backups under `/home/sysadmin/backups/` (outside Git).
+8. Use a dedicated `security-reader` ServiceAccount—do not grant powers to `default`.
+9. Enumerate verbs/resources (no wildcards) in the Role; bind only via RoleBinding.
+10. Unsafe `cluster-admin` demo must be deleted and revalidated; never leave it standing or committed as desired state.
 
 ## Known limitations
 
 - Single host; no HA, no separate management plane.
 - UFW allows SSH from Anywhere at the host layer (source IP may not be stable).
-- Default K3s kubeconfig is cluster-admin; RBAC least privilege not yet applied.
+- Default K3s **human** kubeconfig is still cluster-admin; Phase 2 hardened a *workload* identity, not operator SSO.
 - Default allow-all Pod networking; no NetworkPolicies yet.
 - No Pod Security Admission hardening yet.
 - No audit logging / runtime detection (Falco) yet.
-- Passwordless sudo may be temporarily enabled for agent automation; must be removed after the phase.
+- Passwordless sudo may be temporarily enabled for agent automation; must be removed after lab work.
 - Not production hardened.
 
 ## Remaining roadmap
 
 | Phase | Intent |
 |-------|--------|
-| **2** | RBAC, least-privilege identities, avoid standing cluster-admin for daily use |
 | **3** | NetworkPolicies / workload isolation |
 | **4** | Audit logging, metrics/detection orientation |
 | **5** | Threat scenarios and remediation practice |
 
-Related deeper topics (PSA, Secrets patterns, Falco, GitOps) land in later phases as scoped.
+Related deeper topics (PSA, Secrets patterns, Falco, GitOps, human break-glass RBAC) land in later phases as scoped.
 
 ## Reboot requirement
 
-- Phase 0/1: **no reboot required** for documented work (`/var/run/reboot-required` absent at Phase 0; K3s install did not require reboot).
+- Phase 0/1/2: **no reboot required** for documented work.
 
 ## Next phase
 
-**Phase 2 — not started.** Explicit non-goals from Phase 1 remain deferred: RBAC, NetworkPolicies, Pod Security Admission, Falco, Helm, Ingress, multi-node.
+**Phase 3 — not started.** Explicit non-goals remain deferred: NetworkPolicies, Pod Security Admission, Falco, Helm, Ingress, multi-node, audit log configuration.

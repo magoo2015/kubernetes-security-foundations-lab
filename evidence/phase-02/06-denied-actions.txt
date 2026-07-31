@@ -1,0 +1,8 @@
+=== delete pod (expect Forbidden) ===
+Error from server (Forbidden): pods "nginx-69c95cff8b-z585x" is forbidden: User "system:serviceaccount:lab-app:security-reader" cannot delete resource "pods" in API group "" in the namespace "lab-app"
+
+=== get secrets (expect Forbidden) ===
+Error from server (Forbidden): secrets is forbidden: User "system:serviceaccount:lab-app:security-reader" cannot list resource "secrets" in API group "" in the namespace "lab-app"
+
+=== get nodes (expect Forbidden) ===
+Error from server (Forbidden): nodes is forbidden: User "system:serviceaccount:lab-app:security-reader" cannot list resource "nodes" in API group "" at the cluster scope

@@ -1,0 +1,6 @@
+=== After unsafe cluster-admin bind ===
+yes
+yes
+yes
+yes
+yes

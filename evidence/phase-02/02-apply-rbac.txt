@@ -1,0 +1,3 @@
+serviceaccount/security-reader created
+role.rbac.authorization.k8s.io/security-reader created
+rolebinding.rbac.authorization.k8s.io/security-reader created

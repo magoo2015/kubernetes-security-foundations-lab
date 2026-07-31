@@ -1,0 +1,27 @@
+=== Application health ===
+NAME                         READY   STATUS    RESTARTS   AGE
+pod/nginx-69c95cff8b-z585x   1/1     Running   0          14h
+
+NAME            TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)   AGE
+service/nginx   ClusterIP   <IP_REDACTED>   <none>        80/TCP    14h
+
+NAME                    READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/nginx   1/1     1            1           14h
+
+NAME                               DESIRED   CURRENT   READY   AGE
+replicaset.apps/nginx-67c47577c    0         0         0       14h
+replicaset.apps/nginx-69c95cff8b   1         1         1       14h
+
+=== Final RBAC inventory ===
+NAME                             AGE
+serviceaccount/default           14h
+serviceaccount/security-reader   13s
+
+NAME                                             CREATED AT
+role.rbac.authorization.k8s.io/security-reader   2026-07-31T05:44:09Z
+
+NAME                                                    ROLE                   AGE
+rolebinding.rbac.authorization.k8s.io/security-reader   Role/security-reader   13s
+
+=== No leftover unsafe CRB ===
+none (good)
